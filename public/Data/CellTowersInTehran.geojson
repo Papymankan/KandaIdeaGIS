@@ -1,0 +1,163 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [530500, 3950500]  
+      },
+      "properties": {
+        "tower_id": 1,
+        "cells": [
+          {
+            "cell_id": "1A",
+            "azimuth": 30,
+            "coverage_angle": 120,
+            "coverage_length": 500,
+            "network_type": "4G"
+          },
+          {
+            "cell_id": "1B",
+            "azimuth": 150,
+            "coverage_angle": 120,
+            "coverage_length": 600,
+            "network_type": "3G"
+          },
+          {
+            "cell_id": "1C",
+            "azimuth": 270,
+            "coverage_angle": 90,
+            "coverage_length": 550,
+            "network_type": "2G"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [530700, 3951500]  
+      },
+      "properties": {
+        "tower_id": 2,
+        "cells": [
+          {
+            "cell_id": "2A",
+            "azimuth": 45,
+            "coverage_angle": 110,
+            "coverage_length": 550,
+            "network_type": "4G"
+          },
+          {
+            "cell_id": "2B",
+            "azimuth": 165,
+            "coverage_angle": 130,
+            "coverage_length": 500,
+            "network_type": "3G"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [530000, 3951900]  
+      },
+      "properties": {
+        "tower_id": 3,
+        "cells": [
+          {
+            "cell_id": "3A",
+            "azimuth": 60,
+            "coverage_angle": 100,
+            "coverage_length": 520,
+            "network_type": "2G"
+          },
+          {
+            "cell_id": "3B",
+            "azimuth": 180,
+            "coverage_angle": 120,
+            "coverage_length": 530,
+            "network_type": "4G"
+          },
+          {
+            "cell_id": "3C",
+            "azimuth": 300,
+            "coverage_angle": 90,
+            "coverage_length": 500,
+            "network_type": "3G"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [533000, 3952200]  
+      },
+      "properties": {
+        "tower_id": 4,
+        "cells": [
+          {
+            "cell_id": "4A",
+            "azimuth": 90,
+            "coverage_angle": 130,
+            "coverage_length": 560,
+            "network_type": "4G"
+          },
+          {
+            "cell_id": "4B",
+            "azimuth": 210,
+            "coverage_angle": 110,
+            "coverage_length": 580,
+            "network_type": "3G"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [533200, 3952400]  
+      },
+      "properties": {
+        "tower_id": 5,
+        "cells": [
+          {
+            "cell_id": "5A",
+            "azimuth": 120,
+            "coverage_angle": 140,
+            "coverage_length": 590,
+            "network_type": "2G"
+          },
+          {
+            "cell_id": "5B",
+            "azimuth": 240,
+            "coverage_angle": 120,
+            "coverage_length": 610,
+            "network_type": "4G"
+          },
+          {
+            "cell_id": "5C",
+            "azimuth": 360,
+            "coverage_angle": 100,
+            "coverage_length": 570,
+            "network_type": "3G"
+          },
+          {
+            "cell_id": "5D",
+            "azimuth": 60,
+            "coverage_angle": 90,
+            "coverage_length": 500,
+            "network_type": "4G"
+          }
+        ]
+      }
+    }
+  ]
+}
