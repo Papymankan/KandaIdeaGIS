@@ -1,10 +1,17 @@
 // src/components/MapView.js
 import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Polygon } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polygon,
+  FeatureGroup,
+} from "react-leaflet";
 import L from "leaflet";
 import proj4 from "proj4";
 import CoverageSector from "./CoverageSector";
+import { EditControl } from "react-leaflet-draw";
 
 const centerTehran = [35.6892, 51.389];
 
@@ -22,13 +29,18 @@ function MapView() {
     fetch("/Data/CellTowersInTehran.geojson")
       .then((res) => res.json())
       .then((data) => {
-
         setTowers(data.features);
       });
   }, []);
 
   const utm39 = "+proj=utm +zone=39 +datum=WGS84 +units=m +no_defs";
   const wgs84 = "+proj=longlat +datum=WGS84 +no_defs";
+
+  const handleDrawCreated = (e) => {
+    const layer = e.layer;
+    const latlngs = layer.getLatLngs()[0];
+    console.log("Drawn polygon coordinates:", latlngs);
+  };
 
   return (
     <MapContainer
@@ -63,6 +75,20 @@ function MapView() {
           </React.Fragment>
         );
       })}
+
+      <FeatureGroup>
+        <EditControl
+          position="topright"
+          draw={{
+            rectangle: false,
+            circle: false,
+            marker: false,
+            polyline: false,
+            polygon: true,
+          }}
+          onCreated={handleDrawCreated}
+        />
+      </FeatureGroup>
     </MapContainer>
   );
 }

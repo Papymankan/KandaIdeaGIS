@@ -1,4 +1,7 @@
 import MapView from "./components/MapView";
+import "leaflet-draw/dist/leaflet.draw.css";
+import "leaflet/dist/leaflet.css";
+
 
 function App() {
   return (
