@@ -13,11 +13,17 @@ import CoverageSector from "./CoverageSector";
 import { EditControl } from "react-leaflet-draw";
 import * as turf from "@turf/turf";
 import { createSectorPolygon } from "../utils";
+import ReactModal from "react-modal";
+import { Dialog } from "@headlessui/react";
+
+ReactModal.setAppElement("#root");
 
 const centerTehran = [35.6892, 51.389];
 
 function MapView() {
   const [towers, setTowers] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [coverageResults, setCoverageResults] = useState(null);
   const featureGroupRef = useRef(null);
 
   const towerIcon = L.icon({
@@ -36,7 +42,6 @@ function MapView() {
   const utm39 = "+proj=utm +zone=39 +datum=WGS84 +units=m +no_defs";
   const wgs84 = "+proj=longlat +datum=WGS84 +no_defs";
 
-  // 🧠 Attach Leaflet draw:created event manually
   const MapEventHandler = () => {
     const map = useMapEvents({
       "draw:created": (e) => handleDrawCreated(e),
@@ -49,7 +54,6 @@ function MapView() {
     const latlngs = layer.getLatLngs()[0];
     const coords = latlngs.map((p) => [p.lat, p.lng]);
 
-    // Ensure polygon is closed
     if (
       coords[0][0] !== coords[coords.length - 1][0] ||
       coords[0][1] !== coords[coords.length - 1][1]
@@ -57,7 +61,6 @@ function MapView() {
       coords.push(coords[0]);
     }
 
-    // Create drawn polygon
     const drawnPolygon = turf.polygon([coords]);
     const results = {};
 
@@ -73,7 +76,6 @@ function MapView() {
           cell.coverage_length
         );
 
-        // Ensure sector polygon is closed
         if (
           sectorCoords[0][0] !== sectorCoords[sectorCoords.length - 1][0] ||
           sectorCoords[0][1] !== sectorCoords[sectorCoords.length - 1][1]
@@ -86,7 +88,6 @@ function MapView() {
         ]);
 
         try {
-          // Validate polygons
           const drawnValid = turf.booleanValid(drawnPolygon);
           const sectorValid = turf.booleanValid(sectorPolygon);
 
@@ -94,18 +95,15 @@ function MapView() {
             return;
           }
 
-          // Check for intersection
           const intersects = turf.booleanIntersects(
             drawnPolygon,
             sectorPolygon
           );
 
           if (intersects) {
-            // Get bounding boxes
             const drawnBbox = turf.bbox(drawnPolygon);
             const sectorBbox = turf.bbox(sectorPolygon);
 
-            // Calculate intersection bbox
             const intersectBbox = [
               Math.max(drawnBbox[0], sectorBbox[0]),
               Math.max(drawnBbox[1], sectorBbox[1]),
@@ -113,7 +111,6 @@ function MapView() {
               Math.min(drawnBbox[3], sectorBbox[3]),
             ];
 
-            // Clip polygons to intersection bbox and calculate area
             const clippedDrawn = turf.bboxClip(drawnPolygon, intersectBbox);
             const clippedSector = turf.bboxClip(sectorPolygon, intersectBbox);
 
@@ -137,58 +134,97 @@ function MapView() {
       });
     });
 
-    console.log("Coverage results:", results);
+    setCoverageResults(results);
+    setShowModal(true);
+
+    const map = featureGroupRef.current._map;
+    map.removeLayer(e.layer);
   };
 
-
   return (
-    <MapContainer
-      center={centerTehran}
-      zoom={12}
-      style={{ height: "100%", width: "100%", borderRadius: "16px" }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://osm.org/">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-
-      {towers.map((tower) => {
-        const [x, y] = tower.geometry.coordinates;
-        const [lng, lat] = proj4(utm39, wgs84, [x, y]);
-
-        return (
-          <React.Fragment key={tower.properties.tower_id}>
-            <Marker position={[lat, lng]} icon={towerIcon}>
-              <Popup>Tower ID: {tower.properties.tower_id}</Popup>
-            </Marker>
-
-            {tower.properties.cells.map((cell, idx) => (
-              <CoverageSector
-                key={tower.properties.tower_id + "-" + idx}
-                tower={tower}
-                cell={cell}
-              />
-            ))}
-          </React.Fragment>
-        );
-      })}
-
-      <FeatureGroup ref={featureGroupRef}>
-        <EditControl
-          position="topright"
-          draw={{
-            rectangle: false,
-            circle: false,
-            marker: false,
-            polyline: false,
-            polygon: true,
-          }}
+    <>
+      <MapContainer
+        center={centerTehran}
+        zoom={12}
+        style={{
+          height: "100%",
+          width: "100%",
+          borderRadius: "16px",
+          zIndex: 1,
+        }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://osm.org/">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-      </FeatureGroup>
 
-      {/* 👇 This hooks the native Leaflet draw:created event */}
-      <MapEventHandler />
-    </MapContainer>
+        {towers.map((tower) => {
+          const [x, y] = tower.geometry.coordinates;
+          const [lng, lat] = proj4(utm39, wgs84, [x, y]);
+
+          return (
+            <React.Fragment key={tower.properties.tower_id}>
+              <Marker position={[lat, lng]} icon={towerIcon}>
+                <Popup>Tower ID: {tower.properties.tower_id}</Popup>
+              </Marker>
+
+              {tower.properties.cells.map((cell, idx) => (
+                <CoverageSector
+                  key={tower.properties.tower_id + "-" + idx}
+                  tower={tower}
+                  cell={cell}
+                />
+              ))}
+            </React.Fragment>
+          );
+        })}
+
+        <FeatureGroup ref={featureGroupRef}>
+          <EditControl
+            position="topright"
+            draw={{
+              rectangle: false,
+              circle: false,
+              marker: false,
+              polyline: false,
+              polygon: true,
+            }}
+          />
+        </FeatureGroup>
+
+        <MapEventHandler />
+      </MapContainer>
+
+      {coverageResults && (
+        <Dialog
+          open={showModal}
+          onClose={() => setShowModal(false)}
+          className="relative z-50"
+        >
+          <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <Dialog.Panel className="bg-white rounded-lg p-6 max-w-sm mx-auto">
+              <Dialog.Title className="text-lg font-bold mb-2">
+                Intersection Results
+              </Dialog.Title>
+              <ul>
+                {Object.entries(coverageResults).map(([type, area]) => (
+                  <li key={type}>
+                    {type}: {area.toFixed(2)} m²
+                  </li>
+                ))}
+              </ul>
+              <button
+                className="mt-4 bg-blue-500 text-white px-3 py-1 rounded"
+                onClick={() => setShowModal(false)}
+              >
+                Close
+              </button>
+            </Dialog.Panel>
+          </div>
+        </Dialog>
+      )}
+    </>
   );
 }
 

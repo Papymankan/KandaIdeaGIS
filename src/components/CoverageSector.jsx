@@ -1,6 +1,5 @@
 import React from "react";
 import { Polygon } from "react-leaflet";
-import * as turf from "@turf/turf";
 import proj4 from "proj4";
 import { createSectorPolygon } from "../utils";
 
