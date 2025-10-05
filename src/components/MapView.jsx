@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polygon } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import proj4 from "proj4";
-// import { createSectorPolygon } from "../utils/coverageUtils";
+import CoverageSector from "./CoverageSector";
 
 const centerTehran = [35.6892, 51.389];
 
@@ -22,7 +22,6 @@ function MapView() {
     fetch("/Data/CellTowersInTehran.geojson")
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
 
         setTowers(data.features);
       });
@@ -43,12 +42,25 @@ function MapView() {
       />
 
       {towers.map((tower, i) => {
-        const [x, y] = tower.geometry.coordinates; // UTM coords
+        const [x, y] = tower.geometry.coordinates;
         const [lng, lat] = proj4(utm39, wgs84, [x, y]);
+
         return (
-          <Marker position={[lat, lng]} icon={towerIcon}>
-            <Popup>Hello, this is a tower</Popup>
-          </Marker>
+          <React.Fragment key={tower.properties.tower_id}>
+            {/* Marker */}
+            <Marker position={[lat, lng]} icon={towerIcon}>
+              <Popup>Tower ID: {tower.properties.tower_id}</Popup>
+            </Marker>
+
+            {/* Coverage sectors */}
+            {tower.properties.cells.map((cell, idx) => (
+              <CoverageSector
+                key={tower.properties.tower_id + "-" + idx}
+                tower={tower}
+                cell={cell}
+              />
+            ))}
+          </React.Fragment>
         );
       })}
     </MapContainer>
