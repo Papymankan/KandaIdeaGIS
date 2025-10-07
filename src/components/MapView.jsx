@@ -52,7 +52,6 @@ function MapView() {
   const handleDrawCreated = (e) => {
     const layer = e.layer;
     const latlngs = layer.getLatLngs()[0];
-    console.log(latlngs);
 
     const coords = latlngs.map((p) => [p.lng, p.lat]);
 
@@ -64,6 +63,7 @@ function MapView() {
     }
 
     const drawnPolygon = turf.polygon([coords]);
+    // const drawnPolygon = turf.geometry("Polygon", [coords]);
     const results = {};
 
     towers.forEach((tower) => {
@@ -89,6 +89,10 @@ function MapView() {
           sectorCoords.map(([lat, lng]) => [lng, lat]),
         ]);
 
+        // const sectorPolygon = turf.geometry("Polygon", [
+        //   sectorCoords.map(([lat, lng]) => [lng, lat]),
+        // ]);
+
         try {
           const drawnValid = turf.booleanValid(drawnPolygon);
           const sectorValid = turf.booleanValid(sectorPolygon);
@@ -102,19 +106,24 @@ function MapView() {
             sectorPolygon
           );
 
-          if (cell.cell_id == "1B") {
-            console.log(drawnPolygon);
-            console.log(sectorPolygon);
-          }
-
           if (intersects) {
             console.log(cell.cell_id + " intersects");
 
-            const intersection = turf.intersect(drawnPolygon, sectorPolygon);
-            if (intersection) {
-              const intersectionArea = turf.area(intersection);
-              results[cell.network_type] =
-                (results[cell.network_type] || 0) + intersectionArea;
+            try {
+              console.log(drawnPolygon);
+              console.log(sectorPolygon);
+
+              const intersection = turf.intersect(turf.featureCollection([drawnPolygon, sectorPolygon]) );
+              if (intersection) {
+                const intersectionArea = turf.area(intersection);
+                results[cell.network_type] =
+                  (results[cell.network_type] || 0) + intersectionArea;
+              }
+            } catch (err) {
+              console.warn(
+                `Intersection calculation failed for cell ${cell.cell_id}:`,
+                err
+              );
             }
           }
         } catch (err) {
