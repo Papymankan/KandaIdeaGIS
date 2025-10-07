@@ -52,7 +52,9 @@ function MapView() {
   const handleDrawCreated = (e) => {
     const layer = e.layer;
     const latlngs = layer.getLatLngs()[0];
-    const coords = latlngs.map((p) => [p.lat, p.lng]);
+    console.log(latlngs);
+
+    const coords = latlngs.map((p) => [p.lng, p.lat]);
 
     if (
       coords[0][0] !== coords[coords.length - 1][0] ||
@@ -70,7 +72,7 @@ function MapView() {
 
       tower.properties.cells.forEach((cell) => {
         const sectorCoords = createSectorPolygon(
-          [lat, lng],
+          [lng, lat],
           cell.azimuth,
           cell.coverage_angle,
           cell.coverage_length
@@ -100,32 +102,19 @@ function MapView() {
             sectorPolygon
           );
 
+          if (cell.cell_id == "1B") {
+            console.log(drawnPolygon);
+            console.log(sectorPolygon);
+          }
+
           if (intersects) {
-            const drawnBbox = turf.bbox(drawnPolygon);
-            const sectorBbox = turf.bbox(sectorPolygon);
+            console.log(cell.cell_id + " intersects");
 
-            const intersectBbox = [
-              Math.max(drawnBbox[0], sectorBbox[0]),
-              Math.max(drawnBbox[1], sectorBbox[1]),
-              Math.min(drawnBbox[2], sectorBbox[2]),
-              Math.min(drawnBbox[3], sectorBbox[3]),
-            ];
-
-            const clippedDrawn = turf.bboxClip(drawnPolygon, intersectBbox);
-            const clippedSector = turf.bboxClip(sectorPolygon, intersectBbox);
-
-            if (
-              turf.booleanValid(clippedDrawn) &&
-              turf.booleanValid(clippedSector)
-            ) {
-              const intersectionArea = Math.min(
-                turf.area(clippedDrawn),
-                turf.area(clippedSector)
-              );
-              if (intersectionArea > 0) {
-                results[cell.network_type] =
-                  (results[cell.network_type] || 0) + intersectionArea;
-              }
+            const intersection = turf.intersect(drawnPolygon, sectorPolygon);
+            if (intersection) {
+              const intersectionArea = turf.area(intersection);
+              results[cell.network_type] =
+                (results[cell.network_type] || 0) + intersectionArea;
             }
           }
         } catch (err) {
